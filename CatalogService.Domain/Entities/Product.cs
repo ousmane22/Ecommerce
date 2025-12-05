@@ -8,7 +8,7 @@ public class Product
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
-    public int Id { get; set; }
+    public string Id { get; set; } =  ObjectId.GenerateNewId().ToString();
 
     [BsonElement("name")]
     public string Name { get; set; } = string.Empty;
