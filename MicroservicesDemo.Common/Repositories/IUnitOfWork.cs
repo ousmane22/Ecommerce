@@ -1,8 +1,7 @@
-﻿namespace PaymentService.Domain.Repositories;
+﻿namespace Ecommerce.Common.Repositories;
 
 public interface IUnitOfWork : IDisposable
 {
-    IPaymentRepository Payments { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     Task BeginTransactionAsync();
     Task CommitTransactionAsync();

@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CatalogService.Domain\CatalogService.Domain.csproj" />
+    <ProjectReference Include="..\MicroservicesDemo.Common\Ecommerce.Common.csproj" />
   </ItemGroup>
 
 </Project>

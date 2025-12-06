@@ -1,69 +1,58 @@
-﻿using CatalogService.Domain.Entities;
+﻿#nullable disable
+using CatalogService.Domain.Entities;
 using CatalogService.Domain.Repositories;
 using CatalogService.Infrastructure.Data;
+using Ecommerce.Common.Repositories.MongoDB;
+using Microsoft.Extensions.Logging;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace CatalogService.Infrastructure.Repositories;
 
-public class ProductRepository : IProductRepository
+public class ProductRepository : BaseMongoRepository<Product>, IProductRepository
 {
     private readonly MongoDbContext _context;
 
-    public ProductRepository(MongoDbContext context)
+    public ProductRepository(
+        MongoDbContext context,
+        ILogger<ProductRepository> logger) : base(context.Products, logger)
     {
         _context = context;
     }
-    public async Task AddAsync(Product product)
+
+    protected override FilterDefinition<Product> BuildIdFilter(object id)
     {
-        await _context.Products.InsertOneAsync(product);
+        return Builders<Product>.Filter.Eq(p => p.Id, id.ToString());
     }
 
-    public async Task DeleteAsync(string id)
+    protected override object GetEntityId(Product entity)
     {
-        await _context.Products.DeleteOneAsync(p => p.Id == id);
-    }
-
-    public async Task<bool> ExistsAsync(string id)
-    {
-       var count =  await _context.Products.CountDocumentsAsync(p => p.Id == id);
-       return count > 0;
-    }
-
-    public async Task<IEnumerable<Product>> GetAllAsync()
-    {
-      return await _context.Products
-            .Find(_ => true)
-            .ToListAsync();
+        return entity.Id;
     }
 
     public async Task<IEnumerable<Product>> GetByCategoryAsync(string category)
     {
-       return await _context.Products
-            .Find(p => p.Category == category)
-            .ToListAsync();
-    }
-
-    public async Task<Product?> GetByIdAsync(string id)
-    {
-        return await _context.Products
-            .Find(p => p.Id == id)
-            .FirstOrDefaultAsync();
+        return await base.FindAsync(p => p.Category == category);
     }
 
     public async Task<IEnumerable<Product>> SearchByNameAsync(string searchTerm)
     {
-       var filter = Builders<Product>.Filter.Regex(p => p.Name,
-           new MongoDB.Bson.BsonRegularExpression(searchTerm, "i"));
-
-        return await _context.Products
-                .Find(filter)
-                .ToListAsync();
+        var filter = Builders<Product>.Filter.Regex(
+            p => p.Name,
+            new BsonRegularExpression(searchTerm, "i"));
+        
+        return await Collection.Find(filter).ToListAsync();
     }
 
-    public async Task UpdateAsync(Product product)
+    public override void Update(Product product)
     {
-       product.UpdatedAt = DateTime.UtcNow;
-       await _context.Products.ReplaceOneAsync(p => p.Id == product.Id, product);
+        product.UpdatedAt = DateTime.UtcNow;
+        base.Update(product);
+    }
+
+    public async Task<bool> ExistsAsync(string id)
+    {
+        return await base.ExistsAsync(p => p.Id == id);
     }
 
     public async Task<bool> UpdateStockAsync(string id, int quantity)

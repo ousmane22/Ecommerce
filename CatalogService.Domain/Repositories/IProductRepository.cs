@@ -1,16 +1,13 @@
-﻿using CatalogService.Domain.Entities;
+﻿#nullable disable
+using CatalogService.Domain.Entities;
+using Ecommerce.Common.Repositories;
 
 namespace CatalogService.Domain.Repositories;
 
-public interface IProductRepository
+public interface IProductRepository : IRepository<Product>
 {
-    Task<IEnumerable<Product>> GetAllAsync();
-    Task<Product?> GetByIdAsync(string id);
     Task<IEnumerable<Product>> GetByCategoryAsync(string category);
     Task<IEnumerable<Product>> SearchByNameAsync(string searchTerm);
-    Task AddAsync(Product product);
-    Task UpdateAsync(Product product);
-    Task<bool> UpdateStockAsync(string id, int quantity);
-    Task DeleteAsync(string id);
     Task<bool> ExistsAsync(string id);
+    Task<bool> UpdateStockAsync(string id, int quantity);
 }

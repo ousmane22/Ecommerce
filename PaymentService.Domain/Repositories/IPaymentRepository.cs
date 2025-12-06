@@ -1,14 +1,12 @@
-﻿using PaymentService.Domain.Entities;
+﻿#nullable disable
+using PaymentService.Domain.Entities;
+using Ecommerce.Common.Repositories;
 
 namespace PaymentService.Domain.Repositories;
 
-public interface IPaymentRepository
+public interface IPaymentRepository : IRepository<Payment>
 {
-    Task<Payment?> GetByIdAsync(int id);
-    Task<Payment?> GetByOrderIdAsync(string orderId);
+    Task<Payment> GetByOrderIdAsync(string orderId);
     Task<IEnumerable<Payment>> GetByCustomerIdAsync(string customerId);
-    Task<IEnumerable<Payment>> GetAllAsync();
     Task<Payment> CreateAsync(Payment payment);
-    Task UpdateAsync(Payment payment);
-    Task<bool> ExistsAsync(int id);
 }

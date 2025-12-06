@@ -4,6 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <LangVersion>latest</LangVersion>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
   <!-- Configurations communes pour tous les projets -->
@@ -12,21 +13,4 @@
     <Company>MicroservicesDemo</Company>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
-
-
-
-  <!-- Versions centralis�es des packages -->
-  <ItemGroup Label="Package Versions">
-    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
-    <PackageVersion Include="MediatR" Version="14.0.0" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0" />
-    <PackageVersion Include="MongoDB.Driver"  Version="3.5.2" />
-    <PackageVersion Include="MongoDB.Bson" Version="3.5.2" />
-    <PackageVersion Include="RabbitMQ.Client"  Version="7.2.0" />
-    <PackageVersion Include="FluentValidation" Version="12.1.1" />
-    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-    <PackageVersion Include="Swashbuckle.AspNetCore"  Version="6.6.2" />
-  </ItemGroup>
 </Project>

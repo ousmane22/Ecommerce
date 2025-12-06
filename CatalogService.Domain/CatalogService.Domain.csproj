@@ -4,4 +4,8 @@
     <PackageReference Include="MongoDB.Bson" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\MicroservicesDemo.Common\Ecommerce.Common.csproj" />
+  </ItemGroup>
+
 </Project>
