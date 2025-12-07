@@ -1,4 +1,3 @@
-#nullable disable
 using Ecommerce.Common.Repositories;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
@@ -21,7 +20,7 @@ public abstract class BaseMongoRepository<TEntity> : IRepository<TEntity>
         Logger = logger;
     }
 
-    public virtual async Task<TEntity> GetByIdAsync(object id)
+    public virtual async Task<TEntity?> GetByIdAsync(object id)
     {
         try
         {
@@ -61,7 +60,7 @@ public abstract class BaseMongoRepository<TEntity> : IRepository<TEntity>
         }
     }
 
-    public virtual async Task<TEntity> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)
+    public virtual async Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)
     {
         try
         {
@@ -176,7 +175,7 @@ public abstract class BaseMongoRepository<TEntity> : IRepository<TEntity>
         }
     }
 
-    public virtual async Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate = null)
+    public virtual async Task<int> CountAsync(Expression<Func<TEntity, bool>>? predicate = null)
     {
         try
         {

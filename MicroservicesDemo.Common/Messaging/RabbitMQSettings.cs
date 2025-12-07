@@ -1,4 +1,4 @@
-﻿namespace Ecommerce.Common.Messaging;
+﻿namespace MicroservicesDemo.Common.Messaging;
 
 public class RabbitMQSettings
 {

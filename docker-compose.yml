@@ -20,21 +20,26 @@ services:
     networks:
       - microservices-network
 
-  # SQL Server pour Payment Service
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: sqlserver
+  # PostgreSQL pour Payment Service
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
     restart: always
     ports:
-      - "1433:1433"
+      - "5432:5432"
     environment:
-      ACCEPT_EULA: "Y"
-      SA_PASSWORD: "Pass@word123"
-      MSSQL_PID: "Express"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: paymentdb
     volumes:
-      - sqlserver_data:/var/opt/mssql
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # ======================
   # MESSAGE BROKER
@@ -86,8 +91,10 @@ services:
       RabbitMQSettings__Password: guest
       RabbitMQSettings__ExchangeName: catalog_exchange
     depends_on:
-      - mongodb
-      - rabbitmq
+      mongodb:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     networks:
       - microservices-network
     restart: on-failure
@@ -103,8 +110,8 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
-      # SQL Server Connection
-      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=PaymentDB;User Id=sa;Password=Pass@word123;TrustServerCertificate=True;"
+      # PostgreSQL Connection
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=paymentdb;Username=postgres;Password=postgres;"
       # RabbitMQ Connection
       RabbitMQSettings__HostName: rabbitmq
       RabbitMQSettings__Port: 5672
@@ -112,8 +119,10 @@ services:
       RabbitMQSettings__Password: guest
       RabbitMQSettings__ExchangeName: payment_exchange
     depends_on:
-      - sqlserver
-      - rabbitmq
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     networks:
       - microservices-network
     restart: on-failure
@@ -133,7 +142,7 @@ volumes:
     driver: local
   mongodb_config:
     driver: local
-  sqlserver_data:
-    driver: local
   rabbitmq_data:
+    driver: local
+  postgres_data:
     driver: local

@@ -1,5 +1,4 @@
-﻿#nullable disable
-using PaymentService.Domain.Enums;
+﻿using PaymentService.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,10 +16,10 @@ namespace PaymentService.Domain.Entities
         public string Currency { get; set; } = "XOF";
         public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
         public PaymentMethod Method { get; set; }
-        public string TransactionId { get; set; }
-        public string PaymentGatewayResponse { get; set; }
+        public string? TransactionId { get; set; }
+        public string? PaymentGatewayResponse { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime ProcessedAt { get; set; }
-        public DateTime CompletedAt { get; set; }
+        public DateTime? ProcessedAt { get; set; }
+        public DateTime? CompletedAt { get; set; }
     }
 }

@@ -2,11 +2,17 @@ using CatalogService.Domain.Repositories;
 using CatalogService.Infrastructure.Data;
 using CatalogService.Infrastructure.Repositories;
 using Ecommerce.Common.Extensions;
+using MediatR;
+using Ecommerce.Common.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
 builder.Services.AddControllers();
+
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(CatalogService.Application.Commands.UpdateProductCommandHandler).Assembly));
+
+builder.Services.AddSingleton<IEventPublisher, NoOpEventPublisher>();
 
 // Configuration Swagger centralisée
 builder.Services.AddSwaggerDocumentation(

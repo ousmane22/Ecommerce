@@ -52,6 +52,12 @@ public class RepositoryBase<T> : IRepository<T> where T : class
         DbSet.Update(entity);
     }
 
+    public virtual async Task UpdateAsync(T entity)
+    {
+        DbSet.Update(entity);
+        await Task.CompletedTask;
+    }
+
     public virtual void UpdateRange(IEnumerable<T> entities)
     {
         DbSet.UpdateRange(entities);
