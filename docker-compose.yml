@@ -129,6 +129,28 @@ services:
       - microservices-network
     restart: on-failure
 
+  # ======================
+  # API GATEWAY
+  # ======================
+  
+  apigateway.api:
+    image: ${DOCKER_REGISTRY-}apigatewayapi
+    container_name: apigateway
+    build:
+      context: .
+      dockerfile: ApiGateway.API/Dockerfile
+    ports:
+      - "5000:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+    depends_on:
+      - catalogservice.api
+      - paymentservice.api
+    networks:
+      - microservices-network
+    restart: on-failure
+
 # ======================
 # NETWORKS
 # ======================
