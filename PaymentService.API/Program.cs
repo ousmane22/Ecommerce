@@ -1,12 +1,14 @@
-using MediatR;
+using Ecommerce.Common.Http;
 using Ecommerce.Common.Messaging;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
-using PaymentService.Infrastructure.Data;
-using PaymentService.Infrastructure.Repositories;
-using PaymentService.Domain.Repositories;
 using PaymentService.Application.Commands;
 using PaymentService.Application.DTOs;
+using PaymentService.Domain.Repositories;
+using PaymentService.Infrastructure.Data;
+using PaymentService.Infrastructure.ExternalServices;
+using PaymentService.Infrastructure.Repositories;
 using System.Linq;
 using System.Reflection;
 
@@ -63,12 +65,22 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// HTTP Client pour CatalogService (Communication synchrone)
+builder.Services.Configure<CatalogServiceSettings>(
+    builder.Configuration.GetSection("CatalogServiceSettings"));
+
+builder.Services.AddHttpClient<IServiceHttpClient, ServiceHttpClient>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(10);
+    client.DefaultRequestHeaders.Add("User-Agent", "PaymentService/1.0");
+});
+
+builder.Services.AddScoped<ICatalogServiceClient, CatalogServiceClient>();
+
 var app = builder.Build();
 
-// Ensure database is available and apply migrations (retry loop with longer wait)
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
-// Log the connection string being used (masked)
 var maskedConnString = connectionString;
 if (!string.IsNullOrEmpty(maskedConnString) && maskedConnString.IndexOf("Password=", StringComparison.OrdinalIgnoreCase) >= 0)
 {
@@ -191,52 +203,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Diagnostic endpoint to inspect DB connectivity and migrations
-app.MapGet("/diagnostics/db", async (HttpContext http) =>
-{
-    using var scope = http.RequestServices.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<PaymentDbContext>();
-
-    var conn = db.Database.GetDbConnection();
-    var connStringSafe = conn.ConnectionString ?? string.Empty;
-    if (!string.IsNullOrEmpty(connStringSafe) && connStringSafe.IndexOf("Password=", StringComparison.OrdinalIgnoreCase) >= 0)
-    {
-        connStringSafe = System.Text.RegularExpressions.Regex.Replace(connStringSafe, "(Password=)([^;]*)", "$1****", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-    }
-
-    bool canConnect = false;
-    bool paymentsExists = false;
-    var allMigrations = new List<string>();
-    var appliedMigrations = new List<string>();
-    var pendingMigrations = new List<string>();
-
-    try
-    {
-        canConnect = db.Database.CanConnect();
-        allMigrations = db.Database.GetMigrations().ToList();
-        appliedMigrations = db.Database.GetAppliedMigrations().ToList();
-        pendingMigrations = db.Database.GetPendingMigrations().ToList();
-        
-        var count = await db.Payments.CountAsync();
-        paymentsExists = true;
-    }
-    catch (Exception ex)
-    {
-        var logger = http.RequestServices.GetRequiredService<ILogger<Program>>();
-        logger.LogWarning(ex, "Error retrieving diagnostics");
-    }
-
-    return Results.Json(new
-    {
-        ConnectionString = connStringSafe,
-        Database = conn?.Database,
-        CanConnect = canConnect,
-        AllMigrations = allMigrations,
-        AppliedMigrations = appliedMigrations,
-        PendingMigrations = pendingMigrations,
-        PaymentsTableExists = paymentsExists,
-        MigrationAssembly = typeof(PaymentDbContext).Assembly.GetName().Name
-    });
-});
 
 app.Run();

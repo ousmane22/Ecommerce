@@ -112,6 +112,8 @@ services:
       ASPNETCORE_URLS: http://+:8080
       # PostgreSQL Connection
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=paymentdb;Username=postgres;Password=postgres;"
+      # CatalogService Connection (HTTP synchrone)
+      CatalogServiceSettings__BaseUrl: "http://catalogservice:8080"
       # RabbitMQ Connection
       RabbitMQSettings__HostName: rabbitmq
       RabbitMQSettings__Port: 5672

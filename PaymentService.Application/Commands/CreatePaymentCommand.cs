@@ -10,4 +10,5 @@ public class CreatePaymentCommand : IRequest<PaymentDto>
     public decimal Amount { get; set; }
     public string Currency { get; set; } = "XOF";
     public string Method { get; set; } = string.Empty;
+    public List<OrderItemDto> OrderItems { get; set; } = new();
 }

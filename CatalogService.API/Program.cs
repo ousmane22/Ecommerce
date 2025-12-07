@@ -1,9 +1,11 @@
 using CatalogService.Domain.Repositories;
 using CatalogService.Infrastructure.Data;
+using CatalogService.Infrastructure.ExternalServices;
 using CatalogService.Infrastructure.Repositories;
 using Ecommerce.Common.Extensions;
-using MediatR;
+using Ecommerce.Common.Http;
 using Ecommerce.Common.Messaging;
+using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,9 +30,15 @@ builder.Services.ConfigureSettings<MongoDbSettings>(
 builder.Services.AddSingleton<MongoDbContext>();
 builder.Services.AddRepository<ProductRepository, IProductRepository>();
 
+// HTTP Client pour PaymentService (Communication synchrone)
+builder.Services.Configure<PaymentServiceSettings>(
+    builder.Configuration.GetSection("PaymentServiceSettings"));
+
+builder.Services.AddHttpClient<IServiceHttpClient, ServiceHttpClient>();
+builder.Services.AddScoped<IPaymentServiceClient, PaymentServiceClient>();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 app.UseSwaggerDocumentation(
     title: "Catalog Service API",
     version: "v1",

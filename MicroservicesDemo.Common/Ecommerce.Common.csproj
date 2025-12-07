@@ -2,8 +2,14 @@
 
 
   <ItemGroup>
+    <Compile Remove="Specifications\**" />
+    <EmbeddedResource Remove="Specifications\**" />
+    <None Remove="Specifications\**" />
+  </ItemGroup>
+
+
+  <ItemGroup>
     <Folder Include="Messaging\" />
-    <Folder Include="Specifications\" />
   </ItemGroup>
 
   <ItemGroup>

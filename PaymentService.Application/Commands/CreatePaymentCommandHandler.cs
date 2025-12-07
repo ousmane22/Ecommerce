@@ -3,6 +3,8 @@ using PaymentService.Domain.Repositories;
 using PaymentService.Application.DTOs;
 using PaymentService.Domain.Entities;
 using Ecommerce.Common.Messaging;
+using PaymentService.Infrastructure.ExternalServices;
+using PaymentService.Domain.Events;
 
 namespace PaymentService.Application.Commands;
 
@@ -10,15 +12,30 @@ public class CreatePaymentCommandHandler : IRequestHandler<CreatePaymentCommand,
 {
     private readonly IPaymentRepository _repository;
     private readonly IEventPublisher _eventPublisher;
+    private readonly ICatalogServiceClient _catalogClient;
 
-    public CreatePaymentCommandHandler(IPaymentRepository repository, IEventPublisher eventPublisher)
+    public CreatePaymentCommandHandler(
+        IPaymentRepository repository, 
+        IEventPublisher eventPublisher, 
+        ICatalogServiceClient catalogServiceClient)
     {
         _repository = repository;
         _eventPublisher = eventPublisher;
+        _catalogClient = catalogServiceClient;
     }
 
     public async Task<PaymentDto> Handle(CreatePaymentCommand request, CancellationToken cancellationToken)
     {
+        foreach (var item in request.OrderItems)
+        {
+            var isAvailable = await _catalogClient.CheckStockAvailabilityAsync(item.ProductId, item.Quantity);
+
+            if (!isAvailable)
+            {
+                throw new InvalidOperationException($"Stock insuffisant pour le produit {item.ProductId}");
+            }
+        }
+
         var payment = new Payment
         {
             OrderId = request.OrderId,
@@ -32,7 +49,7 @@ public class CreatePaymentCommandHandler : IRequestHandler<CreatePaymentCommand,
 
         var created = await _repository.CreateAsync(payment);
 
-        await _eventPublisher.PublishAsync(new PaymentService.Domain.Events.PaymentCreatedEvent
+        await _eventPublisher.PublishAsync(new PaymentCreatedEvent
         {
             PaymentId = created.Id,
             OrderId = created.OrderId,
